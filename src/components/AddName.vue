@@ -1,37 +1,50 @@
 <template>
-    <form @submit="submitForm">
-        <div>
-        <div class="row">
-            <p v-if="editing_mode">Edit clicked Name</p>
-            <div class="col-6">
-            <input type="text" v-model="username" placeholder="John Doe" class="form-control" required>
-            </div>
-            <div class="col-6">
-            <input type="tel" v-model="contact" placeholder="0712-345-678" class="form-control" required>
-            </div>
-        </div>
-        <div class="row mt-4">
-            <div class="col-6">
-            <input type="text" v-model="department" placeholder="Department" class="form-control">
-            </div>
-            <div class="col-6">
-            <input type="email" v-model="email" placeholder="example@gmail.com" class="form-control">
-            </div>
-        </div>
-        <div class="d-grid gap-2 mt-4">
-            <button class="btn btn-primary" :class="editing_mode ? 'btn-warning' : 'btn-primary'"  type="submit">
+    <v-form @submit.prevent="submitForm">
+    <v-container>
+      <v-row>
+        <v-col cols="12">
+          <v-alert v-if="editing_mode" type="info">
+            Edit clicked Name
+          </v-alert>
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-text-field v-model="username" label="Name" required></v-text-field>
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-text-field v-model="contact" label="Contact" required></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" md="6">
+          <v-text-field v-model="department" label="Department"></v-text-field>
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-text-field v-model="email" label="Email" required></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row class="mt-4">
+        <v-col cols="12">
+          <v-btn :color="editing_mode ? 'warning' : 'primary'" type="submit">
             {{ editing_mode ? 'Update' : 'Add Name' }}
-            </button>
-            <button v-if="editing_mode" class="btn btn-dark mt-2" @click="discardEdit">Cancel</button>
-        </div>
-        </div>
-    </form>
+          </v-btn>
+          <v-btn v-if="editing_mode" color="dark" class="mt-2" @click="discardEdit">
+            Cancel
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-form>
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref, watch } from 'vue';
+  import { useNameStore } from '@/stores/counter';
+  import { useRouter } from 'vue-router';
+
   
   const emit = defineEmits(['addName', 'updateName']);
+  const nameStore = useNameStore();
+  const router = useRouter();
   
   let username = ref('');
   let contact = ref('');
@@ -91,5 +104,11 @@
   defineExpose({
     setEditName
   });
+  // Watch for changes in the selectedName from the store
+watch(() => useNameStore.selectedName, (newName) => {
+  if (newName) {
+    setEditName(newName);
+  }
+});
   </script>
   

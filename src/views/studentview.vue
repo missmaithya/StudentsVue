@@ -1,25 +1,19 @@
 <template>
-     <main>
-  <h1 >Student Names</h1>
-    <div class="row mt-4">
-      <div class="col-12 col-md-6 offset-md-3">
-        <div class="card">
-          <div class="card-body">
-              <!--This div container contains the list of memebrs registered-->
-              <div>
-                <div v-if="all_names.length === 0" class="alert alert-warning text-center">
-                No students found
-              </div>
-                <NameList :all_names="all_names"  @deleteName="deleteName" @editName="editName"/>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div>
-       
-    </div>
-  </main>
+  <v-container>
+    <v-row>
+      <v-col cols="12">
+        <v-alert v-if="all_names.length === 0" type="warning" text>
+          Fill the form
+        </v-alert>
+        <v-alert v-else type="success" text>
+          Form successfully filled
+        </v-alert>
+      </v-col>
+      <v-col cols="12">
+        <NameList :all_names="all_names" @deleteName="deleteName" @editName="editName" />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup>
@@ -27,10 +21,12 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import NameList from '@/components/NameList.vue';
 import { useRouter } from 'vue-router';
+import { useNameStore } from '@/stores/counter.js';
 
 
 let all_names = ref([]);
 const router = useRouter();
+const nameStore = useNameStore();
 
 const api = axios.create({
   baseURL: 'http://localhost:8000/api/',
@@ -61,12 +57,14 @@ async function deleteName(id) {
 function editName(id) {
   const name = all_names.value.find(name => name.id === id);
   if (name) {
-    router.push({ name: 'home', query: { ...name } });
+    nameStore.setSelectedName(name);
+    router.push({ name: 'home' });
   } else {
     console.error('Name not found with id:', id);
   }
 }
-onMounted(()=>{
-  fetchNames()
+
+onMounted(() => {
+  fetchNames();
 });
 </script>

@@ -1,36 +1,12 @@
 
 <template>
-  <main>
-    <div class="container mt-4">
-      <h1>Home</h1>
-      
-      <p> Home</p>
-
-
-      <div class="row">
-        <div class="col-6 offset-md-3">
-          <div class="card">
-            <div class="card-body">
-              
-              <div class="alert alert-warning text-center" v-if="all_names.length == 0">
-                 Fill the form
-              </div>
-
-              <div class="alert alert-warning text-center" v-else>
-                Form successfully filled
-               
-                
-              </div>
-
-              <AddName ref="addnoteref" @addName="addName" @updateName="updateName"/>
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </main>
+ <v-container>
+    <v-row>
+      <v-col cols="12">
+        <AddName ref="addnoteref" @addName="addName" @updateName="updateName" />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 
@@ -40,11 +16,14 @@ import AddName from '@/components/AddName.vue';
 import NameList from '@/components/NameList.vue';
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
+import { toast } from 'vue3-toastify';
+import { useNameStore } from '@/stores/counter';
 
 let all_names = ref([])
 const router = useRouter();
 const route = useRoute();
-const addnoteref = ref(null)
+const addnoteref = ref(null);
+const nameStore = useNameStore();
 
 const api = axios.create({
   baseURL: 'http://localhost:8000/api/',
@@ -72,8 +51,10 @@ async function addName (name) {
   try {
     const response = await api.post('students', name);
     fetchNames();
+    toast.success('student added succesfully')
   } catch (error) {
-    console.error('Error adding student:', error);
+    console.error('Error adding students:', error);
+    
   }
 }
 
@@ -107,19 +88,11 @@ function editName(id){
 onMounted(() => {
   fetchNames();
 
-  // Check for query parameters to populate the form for editing
-  const query = route.query;
-  if (query.id) {
-    addnoteref.value.setEditName({
-      id: query.id,
-      username: query.username,
-      contact: query.contact,
-      department: query.department,
-      email: query.email
-    });
+  if (nameStore.selectedName) {
+    addnoteref.value.setEditName(nameStore.selectedName);
+    nameStore.clearSelectedName();
   }
 });
-
 
 </script>
 
