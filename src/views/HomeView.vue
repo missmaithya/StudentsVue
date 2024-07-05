@@ -1,6 +1,7 @@
 
 <template>
  <v-container>
+  <v-btn @click="logoutUser" color="primary">Logout</v-btn>
     <v-row>
       <v-col cols="12">
         <AddName ref="addnoteref" @addName="addName" @updateName="updateName" />
@@ -13,11 +14,25 @@
 <script setup>
 import { ref , onMounted} from 'vue';
 import AddName from '@/components/AddName.vue';
-import NameList from '@/components/NameList.vue';
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import { toast } from 'vue3-toastify';
 import { useNameStore } from '@/stores/counter';
+import { logout } from '@/services/authService';
+
+const logoutUser = async () => {
+  await logout();}
+
+onMounted(() => {
+  const token = localStorage.getItem('access');
+  if (!token) {
+    router.push({ name: 'login' });
+  }
+});
+
+const navigateTo = (routeName) => {
+  router.push({ name: routeName });
+};
 
 let all_names = ref([])
 const router = useRouter();
